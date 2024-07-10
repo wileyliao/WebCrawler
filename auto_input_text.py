@@ -1,3 +1,4 @@
+import pandas as pd
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.edge.service import Service as EdgeService
@@ -25,31 +26,48 @@ def slow_send_keys(element, text):
         element.send_keys(char)
         time.sleep(random.uniform(0.05, 0.12))
 
+def slow_clear(element):
+    """
+    緩慢地清除指定元素中的文本
+    """
+    text_length = len(element.get_attribute('value'))
+    while text_length > 0:
+        element.send_keys('\b')
+        text_length -= 1
+        time.sleep(random.uniform(0.05, 0.12))
+
 def send_medicine(input_box, medicine):
     """
     輸入藥品名稱並選擇下拉框中的唯一項目
     """
-    # 清空輸入框
-    input_box.clear()
-    # 輸入藥品名稱
+    slow_clear(input_box)
     slow_send_keys(input_box, medicine)
 
+    # 檢查是否顯示 No Results
+    no_results = driver.find_element(By.ID, 'MDICldrugnor')
+    if no_results.value_of_css_property('display') == 'block':
+        print(f'No results found for {medicine}')
+        return False
+
     # 等待 <ul id="MDICdrugs"> 列表出現
-    time.sleep(random.uniform(0.7, 1))
     WebDriverWait(driver, 10).until(
         EC.visibility_of_element_located((By.ID, 'MDICdrugs'))
     )
-    # 等待 <li class="activeItem"> 項目變為唯一
     time.sleep(random.uniform(0.7, 1))
+
+    # 等待 <li class="activeItem"> 項目變為唯一
     WebDriverWait(driver, 10).until(
         lambda d: len(d.find_elements(By.CSS_SELECTOR, '#MDICdrugs li.activeItem')) == 1
     )
+    time.sleep(random.uniform(0.8, 1.2))
+
     # 選擇唯一的 <li class="activeItem"> 項目中的 <a> 標籤
     first_result = driver.find_element(By.CSS_SELECTOR, '#MDICdrugs li.activeItem a')
     first_result.click()
+    return True
 
 
-try:
+def main():
     # 打開目標URL
     driver.get('https://reference.medscape.com/drug-interactionchecker')
 
@@ -85,6 +103,7 @@ try:
     time.sleep(random.uniform(0.7, 1))
     clear_all_btn = driver.find_element(By.ID, 'clearallbtn').find_element(By.TAG_NAME, 'a')
     clear_all_btn.click()
+
     time.sleep(random.uniform(0.7, 1))
     # 等待並點擊彈窗中的 "Clear" 按鈕
     WebDriverWait(driver, 10).until(
@@ -95,10 +114,7 @@ try:
     confirm_clear_btn.click()
     time.sleep(random.uniform(0.7, 1))
 
-
-
-
-finally:
-    # 關閉瀏覽器
+if __name__ == '__main__':
+    main()
     driver.quit()
 
