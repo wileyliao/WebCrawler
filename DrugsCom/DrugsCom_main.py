@@ -38,8 +38,8 @@ def search_pairs(driver, drug_1, drug_2, skipped_drugs):
 def main():
     global driver
     driver = initialize_driver()
-    df = load_data(config.FILE_NAME)
-    driver.get(config.URL)
+    df = load_data(DrugCom_config.FILE_NAME)
+    driver.get(DrugCom_config.URL)
     wait_and_get_element(driver, By.ID, 'livesearch-interaction-basic', 20)
     skipped_drugs = set()
     count = 0
@@ -54,7 +54,7 @@ def main():
 
             if count > 8:
                 print('Restart.......')
-                driver = restart_driver(driver, config.URL)
+                driver = restart_driver(driver, DrugCom_config.URL)
                 count = 0
 
             drug_1 = row['drug_1']
@@ -97,8 +97,8 @@ def main():
         except Exception as e:
             print(f'Exception encountered in main loop: {e}')
             df.at[index, 'interactions_DrugCom'] = 'No results'
-            save_data(df, config.FILE_NAME)
-            driver = restart_driver(driver, config.URL)
+            save_data(df, DrugCom_config.FILE_NAME)
+            driver = restart_driver(driver, DrugCom_config.URL)
             count = 0
 
 if __name__ == "__main__":
