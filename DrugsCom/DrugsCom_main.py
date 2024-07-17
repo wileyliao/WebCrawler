@@ -92,7 +92,7 @@ def main():
 
             print(interactions)
             df.at[index, 'interactions_DrugCom'] = interactions
-            save_data(df, config.FILE_NAME)
+            save_data(df, DrugCom_config.FILE_NAME)
 
         except Exception as e:
             print(f'Exception encountered in main loop: {e}')
